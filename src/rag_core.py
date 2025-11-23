@@ -4,17 +4,20 @@ import logging
 import hashlib
 from typing import Dict, Any, Optional, List
 
-# Placeholder imports for future Real Implementation
-# from lightrag import LightRAG, QueryParam
+from lightrag import LightRAG, QueryParam
+from lightrag.llm import gpt_4o_mini_complete, gpt_4o_complete
 
 logger = logging.getLogger(__name__)
 
 def setup_logging():
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
 
 def load_yaml(path: str) -> Dict[str, Any]:
     if not os.path.exists(path):
-        # Return empty dict instead of raising error to allow for graceful degradation/init
         return {}
     with open(path, 'r') as f:
         return yaml.safe_load(f) or {}
@@ -44,23 +47,34 @@ class RAGService:
     """
     def __init__(self, config: Dict[str, Any]):
         self.config = config
-        self.base_working_dir = config.get('working_dir', './lightrag/index')
+        
+        # Resolve working_dir relative to the project root (lightrag-local), not CWD
+        # Assuming this file is in src/rag_core.py, parent of parent is project root
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        
+        # Get config path or default
+        rel_work_dir = config.get('working_dir', './lightrag/index')
+        if rel_work_dir.startswith('./'):
+            rel_work_dir = rel_work_dir[2:]
+            
+        self.base_working_dir = os.path.join(project_root, rel_work_dir)
+        
         # Cache for loaded engines: {project_name: engine_instance}
-        self.engines: Dict[str, Any] = {}
+        self.engines: Dict[str, LightRAG] = {}
         self._ensure_base_dir()
 
     def _ensure_base_dir(self):
         if not os.path.exists(self.base_working_dir):
             os.makedirs(self.base_working_dir)
 
-    def _get_engine(self, project_name: str = "default"):
+    def _get_engine(self, project_name: str = "default") -> LightRAG:
         """
         Lazy loads or creates a LightRAG engine instance for a specific project.
         """
         if project_name in self.engines:
             return self.engines[project_name]
 
-        # Project-specific directory: ./lightrag/index/{project_name}
+        # Project-specific directory: .../lightrag/index/{project_name}
         project_working_dir = os.path.join(self.base_working_dir, project_name)
         
         if not os.path.exists(project_working_dir):
@@ -69,9 +83,23 @@ class RAGService:
 
         logger.info(f"Initializing RAG Engine for project '{project_name}' at {project_working_dir}...")
         
-        # In v0, this is a mock. In real impl, instantiate LightRAG here.
-        # engine = LightRAG(working_dir=project_working_dir, ...)
-        engine = f"MockLightRAGInstance(project={project_name})"
+        # Initialize Real LightRAG
+        # Note: We use the helper functions mapped from config string if needed,
+        # but here we hardcode standard OpenAI ones for simplicity as per 'best' request for now.
+        # In a full generic implementation, we would map config strings to functions.
+        
+        # Using standard OpenAI binding from LightRAG defaults or explicit functions
+        # LightRAG's default llm_model_func is often gpt-4o-mini or similar depending on version.
+        # We explicitly set them to match the config intent.
+        
+        engine = LightRAG(
+            working_dir=project_working_dir,
+            llm_model_func=gpt_4o_mini_complete,  # Using mini for indexing as per config default intention often
+            # Note: LightRAG typically allows separate funcs for different tasks, 
+            # but constructor usually takes one main llm_model_func. 
+            # Use kwargs if specific separation is needed (e.g. llm_model_max_async)
+            # For simplicity and 'best' start, we use the efficient one.
+        )
         
         # Cache the instance
         self.engines[project_name] = engine
@@ -87,7 +115,9 @@ class RAGService:
         
         engine = self._get_engine(project_name)
         logger.info(f"Ingesting text for project '{project_name}' (len={len(text)})...")
-        # engine.insert(text)
+        
+        # LightRAG insert
+        engine.insert(text)
 
     def query(self, text: str, mode: str = "mix", project_name: str = "default") -> str:
         """
@@ -95,20 +125,19 @@ class RAGService:
         """
         engine = self._get_engine(project_name)
         logger.info(f"Querying project '{project_name}': '{text}' (mode={mode})")
-        # param = QueryParam(mode=mode)
-        # return engine.query(text, param=param)
-        return f"Mock Answer for '{text}' from project '{project_name}' context.\n(Mode: {mode})"
+        
+        param = QueryParam(mode=mode)
+        return engine.query(text, param=param)
 
 def parse_document(file_path: str) -> str:
     """
-    Wrapper for RAG-Anything parsing.
+    Simple text parser.
     """
     logger.info(f"Parsing {file_path}...")
     if not os.path.exists(file_path):
         logger.error(f"File not found: {file_path}")
         return ""
     
-    # Mock Parsing Logic
     try:
         with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
             return f.read()

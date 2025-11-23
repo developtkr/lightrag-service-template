@@ -1,4 +1,4 @@
-# LightRAG Service Template (v0.1)
+# LightRAG Service Template (v0.2)
 
 > **로컬/사내 지식 기반 하이브리드(Graph + Vector) RAG 서비스 구축을 위한 템플릿**  
 > LightRAG의 강력한 그래프 검색 기능을 CLI 및 API 형태로 쉽게 서빙할 수 있도록 설계된 스타터 킷입니다.
@@ -16,7 +16,7 @@
 
 ## 🚀 빠른 시작 (Quick Start)
 
-이 프로젝트는 현재 **Mock 모드**가 기본 활성화되어 있어, 복잡한 설치나 API 키 없이 즉시 로직을 테스트해볼 수 있습니다.
+이 프로젝트는 **Real Mode(OpenAI API)**가 기본 활성화되어 있습니다. 시작하기 전에 OpenAI API Key가 필요합니다.
 
 ### 1. 설치
 
@@ -27,9 +27,17 @@ source venv/bin/activate
 
 # 2. 의존성 설치
 pip install -r lightrag-local/requirements.txt
+# (필수) LightRAG 설치
+pip install git+https://github.com/HKUDS/LightRAG.git
 ```
 
-### 2. 문서 인덱싱 (Ingestion)
+### 2. 환경 변수 설정
+
+```bash
+export OPENAI_API_KEY="sk-proj-..."
+```
+
+### 3. 문서 인덱싱 (Ingestion)
 
 특정 프로젝트(`demo-project`)에 문서를 등록합니다.
 
@@ -38,7 +46,7 @@ pip install -r lightrag-local/requirements.txt
 python lightrag-local/scripts/ingest.py --project demo-project
 ```
 
-### 3. 질문하기 (Query)
+### 4. 질문하기 (Query)
 
 등록한 프로젝트의 지식을 기반으로 질문합니다.
 
@@ -81,26 +89,6 @@ python lightrag-local/scripts/query.py "ProjectA의 핵심 요구사항은?" --p
 
 ---
 
-## ⚙️ 실전 모드 설정 (Real World Setup)
-
-실제 **OpenAI API**와 **LightRAG 엔진**을 사용하려면 다음과 같이 설정하세요.
-
-1.  **라이브러리 설치** (Git 설치 필요)
-    ```bash
-    pip install git+https://github.com/HKUDS/LightRAG.git
-    # pip install git+https://github.com/HKUDS/RAG-Anything.git (선택)
-    ```
-
-2.  **API 키 설정**
-    ```bash
-    export OPENAI_API_KEY="sk-..."
-    ```
-
-3.  **Mock 모드 해제**
-    `lightrag-local/src/rag_core.py` 파일을 열어 `_get_engine` 메서드 내의 주석을 해제하고 실제 `LightRAG` 인스턴스를 생성하도록 수정합니다.
-
----
-
 ## 📂 프로젝트 구조
 
 ```text
@@ -116,6 +104,5 @@ lightrag-local/
 │   ├── query.py         # 질의 실행 (--project 옵션 지원)
 │   └── sync_manifest.py # Manifest 자동 동기화 도구
 └── src/                 # 핵심 로직 (Service Core)
-    └── rag_core.py      # Multi-Project 지원 RAG 엔진 매니저
+    └── rag_core.py      # Multi-Project 지원 RAG 엔진 매니저 (Real Impl)
 ```
-

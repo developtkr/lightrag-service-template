@@ -1,5 +1,5 @@
 pyyaml
 openai
-# lightrag-hku  # Example: pip install git+https://github.com/HKUDS/LightRAG.git
+lightrag-hku  # Example: pip install git+https://github.com/HKUDS/LightRAG.git
 # rag-anything  # Example: pip install git+https://github.com/HKUDS/RAG-Anything.git
 
