@@ -1,0 +1,12 @@
+queries:
+  - id: Q001
+    query: "ProjectA onboarding 요구사항 핵심은?"
+    expected: "requirements 문서 기반 3~5줄 요약"
+    sources: [req-001]
+    expected_mode: global
+  - id: Q002
+    query: "A 기능과 B 기능의 의존 관계는?"
+    expected: "그래프 기반으로 관계 설명"
+    sources: [req-001, ref-002]
+    expected_mode: mix
+

@@ -1,0 +1,17 @@
+documents:
+- doc_id: ref-002
+  path: references/ref-002-market.pdf
+  type: reference
+  priority: 2
+  owner: minyoung
+  version: 2025-11-01
+  tags:
+  - market
+- doc_id: req-001
+  path: requirements/req-001-prd.md
+  type: requirement
+  priority: 5
+  owner: minyoung
+  version: v0.1
+  tags:
+  - projectA

@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+
+# LightRAG Data & Indexes
+# 인덱스 데이터는 크기가 크므로 제외, 설정 파일만 포함
+lightrag/index/*
+!lightrag/index/.gitkeep
+
+# Logs
+*.log
+

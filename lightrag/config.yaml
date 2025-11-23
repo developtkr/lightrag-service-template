@@ -1,0 +1,11 @@
+working_dir: "./lightrag/index"
+default_mode: "mix"
+
+llm:
+  index_model: "gpt-4o-mini"
+  query_model: "gpt-4o"
+
+embeddings:
+  model: "text-embedding-3-large"
+  dim: 3072
+
